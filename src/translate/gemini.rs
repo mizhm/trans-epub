@@ -112,15 +112,37 @@ async fn translate_bulk(
         user_contents.push(format!("<paragraph>{}</paragraph>", line));
     }
 
-    let prompt = format!("You are an excellent translator.\
-        Translate it into {}. Please output the following JSON.\
-        A string in `<paragraph>` tag to `</paragraph>` tag is one paragraph.\
-        If a paragraph of input is translated and a paragraph consists of multiple sentences, output an array consisting of multiple String.\
-        There are {} paragraphs of input, please output {} lines.\
-        Using this JSON schema:\
-        Paragraph = {{\"line\": number, \"text\": list[string]}}\
-        Return a `list[Paragraph]`\
-        Please remove `<paragraph>` and `</paragraph>` tags from the translation result.", language, &original_lines.len(), &original_lines.len());
+    let prompt = format!(
+        "You are an expert translator of fantasy literature, proficient in multiple languages including Vietnamese and Han-Viet (Sino-Vietnamese), with a deep understanding of East Asian storytelling styles. I am providing you with a text segment from the novel 'Omniscient Reader’s Viewpoint' (Vietnamese title: 'Toàn trí độc giả'), a renowned Korean fantasy work translated into English. Your task is to translate this text into {} with the highest quality, adhering to the following requirements and rules:\n\
+        1. Preserve the original storytelling style—vivid, humorous, and tense—as it appears in the source text.\n\
+        2. If the target language is Vietnamese, use Han-Viet vocabulary for skill names, Constellation titles, and key concepts to create a formal, captivating tone that resonates with East Asian fantasy aesthetics. Specifically for Vietnamese:\n\
+        - Translate 'Secretive Plotter' as 'Kẻ Mưu Phản Bí Mật'.\n\
+        - Translate 'Black Flame Dragon' as 'Hắc Hỏa Vực Long'.\n\
+        - Translate 'Prisoner of the Golden Headband' as 'Chủ Nhân của Vòng Kim Cô', and apply a similar style to other Constellation titles.\n\
+        - Translate general terms as follows: 'Streamer' to 'Kẻ Phát Thanh', 'Scenario' to 'Kịch Bản', 'Incarnation' to 'Hóa Thân'.\n\
+        3. Ensure no English or Chinese words remain in the translation—convert everything into the target language (except proper names like 'Kim Dokja' or 'Yoo Joonghyuk').\n\
+        4. Produce a natural, fluent, and engaging translation that appeals to readers of fantasy literature in the target language.\n\
+        Additional Translation Rules:\n\
+        - Maintain semantic accuracy: Do not alter the meaning or intent of the original text.\n\
+        - Avoid unnecessary repetition: Use varied vocabulary where appropriate to enhance readability, but keep key terms consistent.\n\
+        - Prioritize consistency: Apply the same translation for recurring names, skills, or concepts throughout the text.\n\
+        - Adapt idioms or cultural references: Localize them into equivalents that fit the fantasy context of the target language.\n\
+        - Enhance tone where needed: Amplify the dramatic or emotional impact using expressive phrasing suited to the target language (e.g., Han-Viet for Vietnamese).\n\
+        Translate it into {}. Please output the following JSON.\n\
+        A string in `<paragraph>` tag to `</paragraph>` tag is one paragraph.\n\
+        If a paragraph of input is translated and consists of multiple sentences, output an array consisting of multiple Strings.\n\
+        There are {} paragraphs of input, please output {} lines.\n\
+        Using this JSON schema:\n\
+        Paragraph = {{\"line\": number, \"text\": list[string]}}\n\
+        Return a `list[Paragraph]`.\n\
+        Please remove `<paragraph>` and `</paragraph>` tags from the translation result.\n\
+        Here is the text to translate:\n{}", 
+        language, 
+        language, 
+        &original_lines.len(), 
+        &original_lines.len(), 
+        &original_lines.join("\n")
+    );
 
     let response = request(model, api_key, &prompt, &user_contents)
         .await
